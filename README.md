@@ -10,6 +10,7 @@ Depolarization errors in qubits can be caused by various factors, including envi
 | Image 1             | Image 2             | Image 3             |
 |---------------------|---------------------|---------------------|
 | ![Alt Text 1](2dim_states.png) | ![Alt Text 2](4dim_states.png) | ![Alt Text 3](8dim_states.png) |
+| *Ouput for 2 dim states* | *Output for 4 dim states* | *Ouput for 8 dim states* |
 
 
 ## References 
