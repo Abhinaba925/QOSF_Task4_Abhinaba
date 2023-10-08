@@ -7,6 +7,94 @@ Depolarization error in qubits is a specific type of noise or error that affects
 Depolarization errors in qubits can be caused by various factors, including environmental interference, electromagnetic radiation, temperature fluctuations, and interactions with nearby particles. These external influences can disrupt the quantum coherence of qubits. Depolarization errors are often mathematically represented as a depolarizing channel. This channel acts probabilistically, randomly applying Pauli X, Y, or Z gates to the qubit with some probability. These Pauli gates introduce errors and cause the qubit's state to evolve in an unpredictable manner. The severity of depolarization error is quantified by an error rate. This rate represents the probability that a qubit will experience a depolarizing error during a quantum operation. Lower error rates are desired for achieving high-fidelity quantum computations. In this task, I have used error rate upto .5 starting from 0.01 in a step of 0.0098. To mitigate the impact of depolarization errors and enhance the reliability of quantum computations, quantum error correction codes are used. These codes involve encoding quantum information redundantly to detect and correct errors that occur during quantum operations.
 
 ## Code
+```python
+
+#-------------------------Part 1--------------------------------#
+    
+import numpy as np
+from math import*
+import matplotlib.pyplot as plt
+from qiskit import QuantumCircuit, Aer, execute
+from qiskit.visualization import plot_histogram
+from qiskit.providers.aer.noise import depolarizing_error
+
+#---------------------------------------------------------------#
+
+# Define the two quantum states 
+state1 = [sqrt(0.3), sqrt(0.7)]  #|A>
+state2 = [sqrt(0.6), sqrt(0.4)]  #|B>
+
+# Create a function to generate the SWAP test circuit with noise
+def swap_test(error_rate):
+    # Create a quantum circuit with three qubits
+    circuit = QuantumCircuit(3, 1)
+    
+    # Encode the two states into qubits 0 and 1
+    circuit.initialize(state1, 0)
+    circuit.initialize(state2, 1)
+    
+    # Apply a depolarizing error to qubit 1
+    error = depolarizing_error(error_rate, 1)
+    circuit.append(error, [1])
+    
+    # Create an equal superposition on qubit 2
+    circuit.h(2)
+    
+    # Apply SWAP test
+    circuit.cswap(2, 0, 1)
+    
+    circuit.h(2)
+    
+    # Measure the third qubit
+    circuit.measure(2, 0)
+    
+    return circuit
+
+# Define a range of error rates and simulate the SWAP test for each rate
+error_rates = np.linspace(0.01, 0.50, 50)  # Varying error rates
+
+results = []
+
+for error_rate in error_rates:
+    circuit = swap_test(error_rate)
+    
+    # Simulate the circuit
+    simulator = Aer.get_backend('qasm_simulator')
+    job = execute(circuit, simulator, shots=1024)
+    result = job.result()
+    counts = result.get_counts()
+    
+    # Calculate the probability of measuring |0⟩
+    if '0' in counts:
+        prob_0 = counts['0'] / 1024
+    else:
+        prob_0 = 0
+    
+    results.append(prob_0)
+
+# Plot the results to observe the effect of varying error rates on the SWAP test outcome
+"""plt.plot(error_rates, results)
+plt.xlabel('Error Rate')
+plt.ylabel('Probability of Measuring |0⟩')
+plt.title('Effect of Depolarizing Error on SWAP Test')
+plt.grid(True)
+plt.show()
+print(circuit)"""
+
+fig, ax = plt.subplots(figsize=(8, 6))
+ax.plot(error_rates, results, marker='o', linestyle='-', color='b')
+ax.set_xlabel('Error Rate', fontsize=14)
+ax.set_ylabel('Squared Inner Product', fontsize=14)
+ax.set_title('Effect of Depolarizing Error on SWAP Test', fontsize=16)
+#ax.legend(fontsize=12)
+ax.grid(True)
+ax.grid(True, linestyle='--', alpha=0.7)
+ax.tick_params(axis='both', which='major', labelsize=12)
+plt.show()
+gate_count = circuit.size()
+print("Gate Count: ", gate_count)
+print(circuit)
+``` 
 
 ## Plots
 | Plot 1 | Plot 2 | Plot 3 |
